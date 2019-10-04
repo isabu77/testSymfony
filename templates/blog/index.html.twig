@@ -15,10 +15,10 @@
             <div class="row justify-content-between card-footer text-muted">
                 <a href="{{path('blog_show', {'id': article.id})}}">en savoir plus</a>  
                 <a href="{{path('blog_edit', {'id': article.id})}}">éditer</a>
-                <p><small><a href="{{path('blog_delete', {'id': article.id})}}">supprimer</a></small></p>
+                <a href="{{path('blog_delete', {'id': article.id})}}">supprimer</a>
             </div>
-         </div>
+        </div>
     </article>
- {% endfor %}
+{% endfor %}
 </section>
 {% endblock %}

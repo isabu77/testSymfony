@@ -64,6 +64,8 @@ class BlogController extends AbstractController
             $this->addFlash('success', 'Le commentaire a bien été posté');
             // redirection sur la vue de l'article
             return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
+        }else{
+            $this->addFlash('error', 'Une erreur est survenue');
         }
 
         // manière longue :
@@ -118,6 +120,8 @@ class BlogController extends AbstractController
 
             // redirection sur la vue de l'article
             return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
+        }else{
+            $this->addFlash('error', 'Une erreur est survenue');
         }
 
         return $this->render('blog/new.html.twig', [
@@ -197,8 +201,9 @@ class BlogController extends AbstractController
 
             // redirection sur la vue de l'article
             return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
+        }else{
+            $this->addFlash('error', 'Une erreur est survenue');
         }
-
 
         return $this->render('blog/comment.html.twig', [
             'controller_name' => 'BlogController',
