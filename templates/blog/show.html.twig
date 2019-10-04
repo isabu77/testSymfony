@@ -10,15 +10,6 @@
         <p class="text-justify">{{article.content | raw}}</p>
     </div>
 </section>
-{% for msg in app.flashes('success') %}
-<div class="flashmessage alert alert-success">
-    {{ msg }}
-</div>
-{% endfor %} {% for msg in app.flashes('error') %}
-<div class="flashmessage alert alert-error">
-    {{ msg }}
-</div>
-{% endfor %}
 
 <section class='commentForm'>
     <h3 class='text-center'>Poster un commentaire</h3>

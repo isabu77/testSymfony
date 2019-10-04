@@ -33,6 +33,15 @@
         </nav>
     </header>
     <div class="container">
+{% for msg in app.flashes('success') %}
+<div class="flashmessage alert alert-success">
+    {{ msg }}
+</div>
+{% endfor %} {% for msg in app.flashes('error') %}
+<div class="flashmessage alert alert-error">
+    {{ msg }}
+</div>
+{% endfor %}
         {% block body %}{% endblock %}
     </div>
     {% block javascripts %}{% endblock %}
