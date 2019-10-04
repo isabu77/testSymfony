@@ -133,4 +133,18 @@ class BlogController extends AbstractController
             'title' => $title
         ]);
     }
+    /**
+     * @Route("/blog/{id}/delete", name="blog_delete")
+     */
+    public function delete(ObjectManager $manager, Article $article)
+    {
+        // suppression de la base :
+        $manager->remove($article);
+        $manager->flush();
+
+        // redirection sur la vue de la boutique
+        return $this->redirectToRoute('blog');
+    }
+
+
 }
