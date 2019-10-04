@@ -5,8 +5,7 @@
         <img src="{{article.image}}" alt="une image">
     </div>
     <div class="rightpart mt-5 ml-3 border-top ">
-        <p><small>posté dans la catégorie : {{article.category.title}}</small></p>
-        <p><small>le {{article.createdAt | date("d-m-Y")}} à {{article.createdAt | date("H:i")}}</small></p>
+        <p><small>posté dans la catégorie {{article.category.title}} le {{article.createdAt | date("d-m-Y")}} à {{article.createdAt | date("H:i")}}</small></p>
         <p class="text-justify">{{article.content | raw}}</p>
     </div>
 </section>
