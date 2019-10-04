@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Entity\Comment;
 use App\Form\ArticleType;
+use App\Form\CommentType;
 use App\Repository\ArticleRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -35,8 +38,34 @@ class BlogController extends AbstractController
     /**
      * @Route("/blog/show/{id}", name="blog_show")
      */
-    public function show(Article $article)
+    public function show(Article $article, Request $request, ObjectManager $manager)
     {
+
+        // pour l'ajout d'un commentaire
+        $comment = new Comment();
+
+        $form = $this->createForm(CommentType::class, $comment);
+
+        // traitement du formulaire
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // en création : pas d'id
+            if (!$comment->getId()) {
+                $comment->setCreatedAt(new \DateTime())
+                    ->setContent(nl2br($comment->getContent()))
+                    ->setArticle($article);
+            }
+
+            // ajout dans la base :
+            $manager->persist($comment);
+            $manager->flush();
+            // add flash messages
+            $this->addFlash('success', 'Le commentaire a bien été posté');
+            // redirection sur la vue de l'article
+            return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
+        }
+
         // manière longue :
         //public function show(Request $request)
         //$articleRepo = $this->getDoctrine()->getRepository(Article::class);
@@ -46,6 +75,7 @@ class BlogController extends AbstractController
         return $this->render('blog/show.html.twig', [
             'controller_name' => 'BlogController',
             'article' => $article,
+            'formComment' =>  $form->createView(),
             'title' => $title
         ]);
     }
@@ -61,48 +91,10 @@ class BlogController extends AbstractController
         if (!$article) {
             $article = new Article();
             $title = "Nouvel article";
+        } else {
+            $title = "Edition de l'article n° " . $article->getId();
         }
-        else{
-            $title = "Edition de l'article n° ". $article->getId();
-        }
 
-        // méthode OBSOLETE statique d'enregistrement de l'article 
-        // if (count($request->request) > 0){
-        //     $article->setTitle($request->request->get('title'))
-        //     ->setContent($request->request->get('content'))
-        //     ->setImage('https://placehold.it/300x250')
-        //     ->setCreatedAt(new \DateTime());
-
-        //     // ajout dans la base :
-        //     $manager->persist($article);
-        //     $manager->flush();
-        // }
-
-        // 1ere méthode symfony : création du formulaire avec ses attributs FRONT
-        // à éviter si on travaille en équipe avec un designer
-        // $form = $this->createFormBuilder($article)
-        //     ->add('title', TextType::class, [
-        //         'attr' => ['class' => 'form-control'],
-        //         'label' => 'Titre'
-        //     ])
-        //     ->add('content', TextareaType::class, [
-        //         'attr' => ['class' => 'form-control'],
-        //         'label' => 'Contenu'
-        //     ])
-        //     ->add('Sauvegarder', SubmitType::class, [
-        //         'attr' => ['class' => 'btn btn-primary mt-3']
-        //     ])
-        //     ->getForm();
-
-        // 2ème méthode symfony : création du formulaire SANS les attributs FRONT
-        // qui seront gérés dans la vue avec form_start(form)
-        // $form = $this->createFormBuilder($article)
-        //     ->add('title', TextType::class)
-        //     ->add('content', TextareaType::class)
-        //     ->add('Sauvegarder', SubmitType::class)
-        //     ->getForm();
-
-        // 3ème méthode symfony (la meilleure): 
         // à partir du type de formulaire associé à l'entity Article
         // par la commande : php bin/console make:form ArticleType Article
 
@@ -121,11 +113,12 @@ class BlogController extends AbstractController
             // ajout dans la base :
             $manager->persist($article);
             $manager->flush();
+            // add flash messages
+            $this->addFlash('success', 'L\'article a bien été posté');
 
             // redirection sur la vue de l'article
             return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
         }
-
 
         return $this->render('blog/new.html.twig', [
             'controller_name' => 'BlogController',
@@ -133,6 +126,7 @@ class BlogController extends AbstractController
             'title' => $title
         ]);
     }
+
     /**
      * @Route("/blog/{id}/delete", name="blog_delete")
      */
@@ -141,10 +135,75 @@ class BlogController extends AbstractController
         // suppression de la base :
         $manager->remove($article);
         $manager->flush();
+        // add flash messages
+        $this->addFlash('success', 'L\'article a bien été supprimé');
 
         // redirection sur la vue de la boutique
         return $this->redirectToRoute('blog');
     }
 
+    /**
+     * @Route("/blog/{id}/deleteComment", name="blog_delete_comment")
+     */
+    public function deleteComment(ObjectManager $manager, Comment $comment, Session $session)
+    {
+        // suppression de la base :
+        $manager->remove($comment);
+        $manager->flush();
 
+        // add flash messages
+        $this->addFlash('success', 'Le commentaire a bien été supprimé');
+
+        // redirection sur la vue de la boutique
+        return $this->redirectToRoute('blog_show', ['id' => $comment->getArticle()->getId()]);
+    }
+
+    /**
+     * méthode utilisée pour l'ajout et l'édition d'un commentaire (2 routes)
+     * @Route("/blog/{idArticle}/{id}/editcomment", name="blog_edit_comment")
+     * @Route("/blog/{idArticle}/comment", name="blog_comment")
+     */
+    public function comment(Request $request, ObjectManager $manager, int $idArticle, Comment $comment = null)
+    {
+        $article = $manager->getRepository(Article::class)->find($idArticle);
+
+        // méthode utilisée pour l'ajout et l'édition d'un article
+        if (!$comment) {
+            $comment = new Comment();
+            $title = "Nouveau commentaire";
+        } else {
+            $title = "Edition du commentaire sur l'article n° " . $article->getId();
+        }
+
+        // à partir du type de formulaire associé à l'entity Comment
+        // par la commande : php bin/console make:form CommentType Comment
+
+        $form = $this->createForm(CommentType::class, $comment);
+
+        // traitement du formulaire
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // en création : pas d'id
+            if (!$comment->getId()) {
+                $comment->setCreatedAt(new \DateTime())
+                    ->setArticle($article);
+            }
+            $comment->setContent(nl2br($comment->getContent()));
+
+            // ajout dans la base :
+            $manager->persist($comment);
+            $manager->flush();
+
+            // redirection sur la vue de l'article
+            return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
+        }
+
+
+        return $this->render('blog/comment.html.twig', [
+            'controller_name' => 'BlogController',
+            'formComment' =>  $form->createView(),
+            'title' => $title
+        ]);
+    }
 }

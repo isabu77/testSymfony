@@ -1,29 +1,57 @@
 {% extends 'base.html.twig' %} {% block title %}{{title}}{% endblock %} {% block body %}
-<section class='article-content'>
-    <article class='col-12 m-auto text-center'>
-        <h1>{{article.title}}</h1>
+<section class='article-content border-bottom d-flex mb-2'>
+    <div class="leftpart">
+        <h2>{{article.title}}</h2>
+        <img src="{{article.image}}" alt="une image">
+    </div>
+    <div class="rightpart mt-5 ml-3 border-top ">
         <p><small>posté dans la catégorie : {{article.category.title}}</small></p>
         <p><small>le {{article.createdAt | date("d-m-Y")}} à {{article.createdAt | date("H:i")}}</small></p>
-        <div class='mb-3'>
-            <img src="{{article.image}}" alt="une image">
-        </div>
         <p class="text-justify">{{article.content | raw}}</p>
-    </article>
+    </div>
+</section>
+{% for msg in app.flashes('success') %}
+<div class="flashmessage alert alert-success">
+    {{ msg }}
+</div>
+{% endfor %} {% for msg in app.flashes('error') %}
+<div class="flashmessage alert alert-error">
+    {{ msg }}
+</div>
+{% endfor %}
+
+<section class='commentForm'>
+    <h3 class='text-center'>Poster un commentaire</h3>
+    {{ form_start(formComment)}}
+    <div class="form-group">
+        {{form_row(formComment.author, { 'label' : 'Auteur', 'attr' : {'class' : 'form-control'} })}}
+    </div>
+    <div class="form-group">
+        {{form_row(formComment.content, { 'label' : 'Commentaire', 'attr' : {'class' : 'form-control'} })}}
+    </div>
+    <div class="form-group">
+        {{form_row(formComment.Sauvegarder, { 'label' : 'Poster', 'attr' : {'class' : 'btn btn-success'} })}}
+    </div>
+    {{ form_end(formComment)}}
 </section>
 
 <section class='comments'>
-    <h2 class='text-center'>Commentaires</h2>
+    <h3 class='text-center'>Commentaires</h3>
     {% for comment in article.comments %}
-    <div class='comment'>
+    <div class='comment border-top'>
         <div class='row flex-column'>
             <div class='col-12 col-sm-10 offset-sm-1'>
-                <p><small>écrit par : {{comment.author}} le {{comment.createdAt | date("d-m-Y")}} à {{comment.createdAt | date("H:i")}}</small></p>
+                <p><small>écrit par : {{comment.author}} le {{comment.createdAt | date("d-m-Y")}} à
+                        {{comment.createdAt | date("H:i")}}</small></p>
             </div>
             <div class='col-12 col-sm-10 offset-sm-1'>
                 <p class="text-justify">{{comment.content | raw}}</p>
             </div>
+            <div class="row justify-content-around">
+                <a class="text-center" href="{{path('blog_edit_comment', {'idArticle': article.id , 'id': comment.id})}}">Modifier</a>
+                <a class="text-center" href="{{path('blog_delete_comment', {'id': comment.id})}}">Supprimer</a>
+            </div>
         </div>
-
         {% endfor %}
     </div>
 

@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %} {% block title %}{{title}}{% endblock %} {% block body %}
+
+<h1>{{title}}</h1>
+{{ form_start(formComment)}}
+<div class="form-group">
+    {{form_row(formComment.author, { 'label' : 'Auteur', 'attr' : {'class' : 'form-control'} })}}
+</div>
+<div class="form-group">
+    {{form_row(formComment.content, { 'label' : 'Contenu', 'attr' : {'class' : 'form-control'} })}}
+</div>
+<div class="form-group">
+    {{form_row(formComment.Sauvegarder, { 'attr' : {'class' : 'btn btn-success'} })}}
+</div>
+{{ form_end(formComment)}} {% endblock %}
