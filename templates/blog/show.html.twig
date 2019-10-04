@@ -1,12 +1,31 @@
-{% extends 'base.html.twig' %} 
-{% block title %}{{title}}{% endblock %} 
-{% block body %}
-<article class='col-4 m-auto'>
-    <h2>{{article.title}}</h2>
-    <small>écrit le {{article.createdAt | date("d-m-Y")}} à {{article.createdAt | date("H:i")}}</small>
-    <div>
-        <img src="{{article.image}}" alt="une image">
+{% extends 'base.html.twig' %} {% block title %}{{title}}{% endblock %} {% block body %}
+<section class='article-content'>
+    <article class='col-12 m-auto text-center'>
+        <h1>{{article.title}}</h1>
+        <p><small>posté dans la catégorie : {{article.category.title}}</small></p>
+        <p><small>le {{article.createdAt | date("d-m-Y")}} à {{article.createdAt | date("H:i")}}</small></p>
+        <div class='mb-3'>
+            <img src="{{article.image}}" alt="une image">
+        </div>
+        <p class="text-justify">{{article.content | raw}}</p>
+    </article>
+</section>
+
+<section class='comments'>
+    <h2 class='text-center'>Commentaires</h2>
+    {% for comment in article.comments %}
+    <div class='comment'>
+        <div class='row flex-column'>
+            <div class='col-12 col-sm-10 offset-sm-1'>
+                <p><small>écrit par : {{comment.author}} le {{comment.createdAt | date("d-m-Y")}} à {{comment.createdAt | date("H:i")}}</small></p>
+            </div>
+            <div class='col-12 col-sm-10 offset-sm-1'>
+                <p class="text-justify">{{comment.content | raw}}</p>
+            </div>
+        </div>
+
+        {% endfor %}
     </div>
-    <p>{{article.content | raw}}</p>
-</article>
+
+</section>
 {% endblock %}

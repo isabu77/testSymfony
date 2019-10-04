@@ -5,7 +5,8 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">{{ article.title }}</h5>
-                <small>écrit le {{article.createdAt | date("d-m-Y")}} à {{article.createdAt | date("H:i")}}</small>
+                <p><small>posté dans la catégorie : {{article.category.title}}</small></p>
+                <small>le {{article.createdAt | date("d-m-Y")}} à {{article.createdAt | date("H:i")}}</small>
                 <div>
                     <img src="{{article.image}}" alt="une image">
                 </div>
