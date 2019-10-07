@@ -1,14 +1,29 @@
 security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    encoders:
+        App\Entity\User:
+            algorithm: argon2i
+            cost: 12
     providers:
         in_memory: { memory: null }
+        in_database:
+            entity:
+                class: App\Entity\User
+                property: email
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
             anonymous: true
-
+            provider: in_database
+            form_login:
+                login_path: security_login
+                check_path: security_login
+                default_target_path: blog
+            logout:
+                path: security_logout
+                target: blog
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
 
@@ -18,5 +33,6 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        #- { path: ^/admin/edit, roles: {ROLE_ADMIN, ROLE_EDITOR}}
         # - { path: ^/profile, roles: ROLE_USER }
