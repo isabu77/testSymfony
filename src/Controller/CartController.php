@@ -43,10 +43,16 @@ class CartController extends AbstractController
     /**
      * @Route("/cart/send", name="cart_send")
      */
-    public function send(MailService $mailService, \Swift_Mailer $mailer)
+    public function send(MailService $mailService, CartService $cartService)
     {
+        $cartwithData = $cartService->getAll();
+
         // avec un service :
-        $mailService->send('Confirmation de commande', $this->renderView('emails/confirm.html.twig'));
+        $mailService->send('Confirmation de commande', $this->render('emails/confirm.html.twig', [
+            'items' => $cartwithData,
+            'total' => $cartService->getTotal($cartwithData)
+        ]));
+        //$this->renderView('emails/confirm.html.twig'));
 
         // add flash messages
         $this->addFlash('success', 'La commande est confirmée par l\'envoi d\'un mail');

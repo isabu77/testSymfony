@@ -1,6 +1,54 @@
 {# templates/emails/confirm.html.twig #}
-<h3>Panier commandé !</h3>
+<html>
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="https://bootswatch.com/4/flatly/bootstrap.min.css"> 
+</head>
+<body>
+<h1>Voici votre confirmation de commande</h1>
 
-MERCI !
+<section class='panier container'>
+    <h1 class="texte-center mb-5"></h1>
+    <table class='table table-stripped'>
+        <thead>
+            <tr>
+                <th>Nomination</th>
+                <th>Extrait</th>
+                <th>quantité</th>
+                <th>prix TTC</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.article.title}}</td>
+                <td>{{ item.article.content | slice(0,50)}}...</td>
+                <td>{{ item.qty}}</td>
+                <td>{{ item.qty * item.article.price}}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td>TOTAL TTC</td>
+                <td>{{ total }}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Nomination</th>
+                <th>Extrait</th>
+                <th>quantité</th>
+                <th>prix TTC</th>
+            </tr>
 
+        </tfoot>
+    </table>
+</section>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
