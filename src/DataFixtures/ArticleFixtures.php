@@ -27,7 +27,8 @@ class ArticleFixtures extends Fixture
                 ->setContent($faker->paragraphs(5, true))
                 ->setImage($faker->imageUrl(300, 250))
                 ->setCreatedAt($faker->dateTimeBetween('-6 month'))
-                ->setCategory($category);
+                ->setCategory($category)
+                ->setPrice($faker->randomFloat(2, 15, 300));
                 
                 $manager->persist($article);
 

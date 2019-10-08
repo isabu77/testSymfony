@@ -7,6 +7,8 @@ use App\Entity\Comment;
 use App\Form\ArticleType;
 use App\Form\CommentType;
 use App\Repository\ArticleRepository;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,11 +23,17 @@ class BlogController extends AbstractController
     /**
      * @Route("/blog", name="blog")
      */
-    public function index()
+    public function index(CacheInterface $cache)
     {
-        $articleRepo = $this->getDoctrine()->getRepository(Article::class);
-        $articles = $articleRepo->findAll();
-
+        // $articleRepo = $this->getDoctrine()->getRepository(Article::class);
+        // $articles = $articleRepo->findAll();
+        $articles = $cache->get('articles', function(ItemInterface $item){
+            $item->expiresAfter(10);
+            //sleep(2);
+            $articleRepo = $this->getDoctrine()->getRepository(Article::class);
+            return $articleRepo->findAll();
+            });
+            
 
         $title = "Les articles";
         return $this->render('blog/index.html.twig', [

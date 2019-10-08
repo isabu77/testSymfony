@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %} {% block title %}BlogSymfony!{% endblock %} {% block body %}
 <section class='row'>
-{% for article in articles %}
+    {% for article in articles %}
     <article class='col-4 mb-4 d-flex align-items-stretch'>
         <div class="card">
             <div class="card-body">
@@ -10,14 +10,17 @@
                     <img src="{{article.image}}" alt="une image">
                 </div>
                 <p class='text-justify mt-2'>{{article.content | raw}}</p>
+                <p class='text-right'>{{article.price}} €</p>
+                <p class='text-center btn btn-primary'>
+                    <a href="{{path('cart_add', {'id': article.id})}}" class='text-left'>Acheter</a></p>
             </div>
             <div class="row justify-content-between card-footer text-muted">
-                <a href="{{path('blog_show', {'id': article.id})}}">en savoir plus</a>  
+                <a href="{{path('blog_show', {'id': article.id})}}">en savoir plus</a>
                 <a href="{{path('blog_edit', {'id': article.id})}}">éditer</a>
                 <a href="{{path('blog_delete', {'id': article.id})}}">supprimer</a>
             </div>
         </div>
     </article>
-{% endfor %}
+    {% endfor %}
 </section>
 {% endblock %}
