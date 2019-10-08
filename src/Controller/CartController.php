@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Services\CartService;
+use App\Services\MailService;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -42,36 +43,15 @@ class CartController extends AbstractController
     /**
      * @Route("/cart/send", name="cart_send")
      */
-    public function send(CartService $cartService, \Swift_Mailer $mailer)
+    public function send(MailService $mailService, \Swift_Mailer $mailer)
     {
-        $message = (new \Swift_Message('Confirmation de commande'))
-            // ->setFrom(MAILER_FROM)
-            // ->setFrom(MAILER_FROM)
-            ->setTo('isabu77@gmail.com')
-            ->setFrom('montluconaformac2019@gmail.com')
-            ->setBody(
-                $this->renderView(
-                    // templates/emails/confirm.html.twig
-                    'emails/confirm.html.twig'
-                    //array('name' => $name)
-                ),
-                'text/html'
-            )
-            /*
-         * If you also want to include a plaintext version of the message
-        ->addPart(
-            $this->renderView(
-                'emails/confirm.txt.twig',
-                array('name' => $name)
-            ),
-            'text/plain'
-        )
-        */;
+        // avec un service :
+        $mailService->send('Confirmation de commande', $this->renderView('emails/confirm.html.twig'));
 
-        $mailer->send($message);
         // add flash messages
         $this->addFlash('success', 'La commande est confirmée par l\'envoi d\'un mail');
 
         return $this->redirectToRoute('cart');
+
     }
 }
