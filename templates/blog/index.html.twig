@@ -2,19 +2,27 @@
 <section class='row'>
     {% for article in articles %}
     <article class='col-4 mb-4 d-flex align-items-stretch'>
-        <div class="card">
-            <div class="card-body">
+        <div class="card mb-0">
+            <div class="card-body mb-0">
                 <h2 class="card-title text-center">{{ article.title }}</h2>
-                <p><small>posté dans la catégorie {{article.category.title}} le {{article.createdAt | date("d-m-Y")}} à {{article.createdAt | date("H:i")}}</small></p>
+                <p><small>posté dans la catégorie {{article.category.title}} le {{article.createdAt | date("d-m-Y")}} à
+                        {{article.createdAt | date("H:i")}}</small></p>
                 <div>
                     <img src="{{article.image}}" alt="une image">
                 </div>
                 <p class='text-justify mt-2'>{{article.content | raw}}</p>
                 <p class='text-right'>{{article.price}} €</p>
-                <p class='text-center btn btn-primary'>
-                    <a href="{{path('cart_add', {'id': article.id})}}" class='text-left'>Acheter</a></p>
+                <p class='text-center'>
+                    <a href="{{path('cart_add', {'id': article.id})}}" class='btn btn-primary'>Acheter</a></p>
+                <p class='text-center'>
+                    <a href="{{path('article_like', {'id': article.id})}}" class='btn btn-link js-like'>
+                        <span class="js-likes">{{article.likes | length}}</span> {% if app.user and article.isLikedByUser(app.user) %}
+                        <i class="fas fa-thumbs-up"></i> {% else %}
+                        <i class="far fa-thumbs-up"></i> {% endif %} J'aime
+                    </a>
+                </p>
             </div>
-            <div class="row justify-content-between card-footer text-muted">
+            <div class="row mt-0 justify-content-between card-footer text-muted">
                 <a href="{{path('blog_show', {'id': article.id})}}">en savoir plus</a>
                 <a href="{{path('blog_edit', {'id': article.id})}}">éditer</a>
                 <a href="{{path('blog_delete', {'id': article.id})}}">supprimer</a>
@@ -23,4 +31,33 @@
     </article>
     {% endfor %}
 </section>
+{% endblock %} {% block javascripts %}
+<script>
+    function onClickLink(event) {
+
+        event.preventDefault();
+        const url = this.href;
+        const spanCount = this.querySelector('span.js-likes');
+        const icone = this.querySelector('i');
+
+        $.get(url, {}, function(data) {
+            if (data.code == 200) {
+                if (icone.classList.contains('fas')) {
+                    icone.classList.replace('fas', 'far');
+                } else {
+                    icone.classList.replace('far', 'fas');
+                }
+                $(spanCount).html(data.likes);
+            } else if (data.code == 403) {
+                alert(data.message);
+            } else {
+                alert("une erreur s\'est produite'");
+            }
+        })
+    }
+    var classe = document.getElementsByClassName('js-like');
+    for (i = 0; i < classe.length; i++) {
+        classe[i].addEventListener('click', onClickLink);
+    }
+</script>
 {% endblock %}

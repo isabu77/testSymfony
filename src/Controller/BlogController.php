@@ -3,19 +3,17 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Entity\ArticleLikes;
 use App\Entity\Comment;
 use App\Form\ArticleType;
 use App\Form\CommentType;
-use App\Repository\ArticleRepository;
+use App\Repository\ArticleLikesRepository;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class BlogController extends AbstractController
@@ -27,13 +25,13 @@ class BlogController extends AbstractController
     {
         // $articleRepo = $this->getDoctrine()->getRepository(Article::class);
         // $articles = $articleRepo->findAll();
-        $articles = $cache->get('articles', function(ItemInterface $item){
-            $item->expiresAfter(10);
+        $articles = $cache->get('articles', function (ItemInterface $item) {
+            $item->expiresAfter(1);  // une seconde
             //sleep(2);
             $articleRepo = $this->getDoctrine()->getRepository(Article::class);
             return $articleRepo->findAll();
-            });
-            
+        });
+
 
         $title = "Les articles";
         return $this->render('blog/index.html.twig', [
@@ -72,7 +70,7 @@ class BlogController extends AbstractController
             $this->addFlash('success', 'Le commentaire a bien été posté');
             // redirection sur la vue de l'article
             return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
-        }else{
+        } else {
             $this->addFlash('error', 'Une erreur est survenue');
         }
 
@@ -128,7 +126,7 @@ class BlogController extends AbstractController
 
             // redirection sur la vue de l'article
             return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
-        }else{
+        } else {
             $this->addFlash('error', 'Une erreur est survenue');
         }
 
@@ -209,7 +207,7 @@ class BlogController extends AbstractController
 
             // redirection sur la vue de l'article
             return $this->redirectToRoute('blog_show', ['id' => $article->getId()]);
-        }else{
+        } else {
             $this->addFlash('error', 'Une erreur est survenue');
         }
 
@@ -218,5 +216,51 @@ class BlogController extends AbstractController
             'formComment' =>  $form->createView(),
             'title' => $title
         ]);
+    }
+
+    /**
+     * méthode utilisée pour l'ajout d'un like
+     * @Route("/article/{id}/like", name="article_like")
+     */
+    public function like(Article $article, ObjectManager $manager, ArticleLikesRepository $repo)
+    {
+
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(
+                [
+                    'code' => 403,
+                    'message' => 'Connectez-vous'
+                ],
+                200
+            );
+        }
+        if ($article->isLikedByUser(($user))) {
+            $like = $repo->findOneBy(['article' => $article, 'users' => $user]);
+            $manager->remove($like);
+            $manager->flush();
+            return $this->json(
+                [
+                    'code' => 200,
+                    'message' => 'like bien supprimé',
+                    'likes' => $repo->count(['article' => $article])
+                ],
+                200
+            );
+        }
+
+        $like = new ArticleLikes();
+        $like->setArticle(($article))
+            ->setUsers($user);
+        $manager->persist($like);
+        $manager->flush();
+        return $this->json(
+            [
+                'code' => 200,
+                'message' => 'like bien ajouté',
+                'likes' => $repo->count(['article' => $article])
+            ],
+            200
+        );
     }
 }
